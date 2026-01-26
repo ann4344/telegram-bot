@@ -2,7 +2,13 @@ import telebot
 from telebot import types
 import os
 
-TOKEN = os.getenv('TOKEN')  # Токен из Render Environment
+# ПРОВЕРКА ТОКЕНА
+TOKEN = os.getenv('TOKEN')
+if not TOKEN:
+    print("❌ ОШИБКА: TOKEN не найден!")
+    exit(1)
+
+print(f"✅ Токен получен: {TOKEN[:10]}...")
 bot = telebot.TeleBot(TOKEN)
 
 @bot.message_handler(commands=['start'])
@@ -23,10 +29,5 @@ def handle_description(message):
 Менеджер свяжется с вами здесь ближайшее время
 (работаем с 10:00 до 19:00 по МСК).''')
 
-# Обработчик всех остальных команд (чтобы не ломать существующий бот)
-@bot.message_handler(func=lambda m: True)
-def handle_all(message):
-    bot.reply_to(message, message.text)
-
-print("Бот запущен!")
+print("🚀 Бот запущен!")
 bot.infinity_polling()
