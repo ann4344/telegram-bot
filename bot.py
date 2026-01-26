@@ -1,29 +1,23 @@
 import telebot
 from telebot import types
+from flask import Flask
 import threading
-import socket
 import time
+import os
+
+app = Flask(__name__)
 
 TOKEN = "8175867277:AAEQ9i6uKEUA0g34yqGE8-qy8_mw4SkiNLk"
 bot = telebot.TeleBot(TOKEN)
 
 print("🚀 Бот запускается...")
 
-def keep_alive():
-    try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        sock.bind(('0.0.0.0', 10000))
-        sock.listen(5)
-        print("🔌 Порт 10000 открыт для Render")
-        while True:
-            conn, addr = sock.accept()
-            conn.close()
-    except Exception as e:
-        print(f"Порт ошибка: {e}")
+# Flask для Render порта
+@app.route('/')
+def home():
+    return "Telegram Bot работает!"
 
-threading.Thread(target=keep_alive, daemon=True).start()
-
+# Telegram handlers
 @bot.message_handler(commands=['start'])
 def handle_start(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
@@ -42,5 +36,12 @@ def handle_description(message):
 Менеджер свяжется с вами здесь ближайшее время
 (работаем с 10:00 до 19:00 по МСК).''')
 
-print("✅ Бот полностью готов!")
-bot.infinity_polling()
+def run_bot():
+    print("✅ Бот запущен!")
+    bot.infinity_polling()
+
+# Запуск Flask + Bot
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 10000))
+    threading.Thread(target=run_bot, daemon=True).start()
+    app.run(host='0.0.0.0', port=port)
